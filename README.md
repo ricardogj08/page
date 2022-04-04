@@ -7,6 +7,7 @@ A simple password manager using `age` written in POSIX `sh`.
 * `sh`, `bash`, `zsh` or other shell like UNIX.
 * GNU Coreutils, BusyBox, Toybox, sbase or other UNIX utilities.
 * [age >= 1.0.0 - a simple, modern and secure file encryption tool, format, and Go library.](https://github.com/FiloSottile/age)
+* [wayclip (optional) -  Wayland clipboard utility.](https://github.com/noocsharp/wayclip)
 
 ## License
 

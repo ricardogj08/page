@@ -16,3 +16,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Muestra un mensaje de ayuda.
+shelp() { printf '%s' "\
+page 1.0 - A simple password manager using age written in POSIX sh.
+
+Synopsis:
+  page [OPTION]
+
+Options:
+  -a <NAME> - Add a new password.
+  -c <NAME> - Copy a password to the clipboard.
+  -d <NAME> - Delete a password.
+  -g        - Generate a master key.
+  -l        - List all password names.
+  -s <NAME> - Show a password.
+
+Environment vars:
+  - Storage location:  export PAGE_DIR=~/.local/share/page
+  - Password lenght:   export PAGE_LENGHT=12
+  - Password pattern:  export PAGE_PATTERN=_[:alnum:]
+  - Clipboard tool:    export PAGE_CLIPBOARD='waycopy -s seat0 -t text/plain'
+  - Clipboard timeout: export PAGE_TIMEOUT=15
+"
+exit 0
+}
+
+main() {
+  shelp
+}
+
+main "$@"
