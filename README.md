@@ -9,6 +9,16 @@ A simple password manager using `age` written in POSIX `sh`.
 * [age >= 1.0.0 - a simple, modern and secure file encryption tool, format, and Go library.](https://github.com/FiloSottile/age)
 * [wayclip (optional) -  Wayland clipboard utility.](https://github.com/noocsharp/wayclip)
 
+## References
+
+* [A simple password manager using GPG written in POSIX sh.](https://github.com/dylanaraps/pash)
+* [A collection of pure POSIX sh alternatives to external processes.](https://github.com/dylanaraps/pure-sh-bible)
+* [POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.html)
+* [XDG Base Directory Specification.](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+* [Manual de Referencia de Bash, para Bash, Version 5.1](https://freakspot.net/programas/docs/bash/manual-de-referencia-de-Bash_5.1.html)
+* [Advanced Bash-Scripting Guide.](https://tldp.org/LDP/abs/html/)
+* [Korn shell](https://www.ibm.com/docs/en/aix/7.3?topic=shells-korn-shell)
+
 ## License
 
 ```text
