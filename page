@@ -17,13 +17,17 @@
 # limitations under the License.
 #
 
+#
 # Muestra mensajes de errores.
+#
 errors() {
   printf '%s.\n' "$1" >&2
   exit 1
 }
 
+#
 # Muestra un mensaje de ayuda.
+#
 shelp() { printf '%s' "\
 page 1.0 - A simple password manager using age written in POSIX sh.
 
@@ -48,11 +52,30 @@ Environment vars:
 exit 0
 }
 
+#
+# Valida si un string coincide con un patrón de búsqueda.
+#
+# @return boolean
+#
+match() { case $1 in $2) return 0; esac; return 1; }
+
+add_pass() {
+  [ -f "$2".age ] &&
+    errors "Pass name '$2' already exists"
+}
+
+gen_key() {
+  [ -f "$key" ] &&
+    errors "Master key already exists"
+}
+
 main() {
   command -v age 2>/dev/null >&2 ||
     errors "'age' not found"
 
+  #
   # Ubicación de almacenamiento por defecto.
+  #
   : "${PAGE_DIR:=${XDG_DATA_HOME:-$HOME/.local/share}/page}"
 
   mkdir -p "$PAGE_DIR" 2>/dev/null ||
@@ -61,24 +84,48 @@ main() {
   cd "$PAGE_DIR" 2>/dev/null ||
     errors "Could not access '$PAGE_DIR' directory"
 
-  # Restringe los permisos de todos los archivos generados
-  # solo al usuario actual.
+  match "$1" '-[acds]' && [ -z "$2" ] &&
+    errors "Option $1 requires an argument"
+
+  match "$1" '-[cds]' && [ ! -f "$2".age ] &&
+    errors "Pass name '$2' doesn't exist"
+
+  key=key.age
+
+  # Obtiene el nombre y la categoría de la contraseña.
+
+  #
+  # Restringe los permisos de todos los archivos
+  # generados solo al usuario actual: chmod 600
+  #
   umask 177
 
-  # Asegura configurar la terminal a un estado utilizable
-  # al finalizar el script o con Ctrl+C
+  #
+  # Asegura configurar la terminal a un estado
+  # utilizable al finalizar el script o con Ctrl+C
+  #
   [ -t 1 ] && trap 'stty echo icanon' INT EXIT
 
   case $1 in
-    *) shelp
+    -a) add_pass ;;
+    -c) copy_pass ;;
+    -d) delete_pass ;;
+    -g) gen_key ;;
+    -l) list_pass ;;
+    -s) show_pass ;;
+     *) shelp
   esac
 }
 
+#
 # Desactiva siempre el modo debug.
+#
 set +x
 
-# Desactiva la expansión de nombres de archivos
-# para evitar inseguridades con la división de palabras.
+#
+# Desactiva la expansión de nombres de archivos para
+# evitar inseguridades con la división de palabras.
+#
 set -f
 
 main "$@"
