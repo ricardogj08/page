@@ -57,11 +57,14 @@ exit 0
 #
 # @return boolean
 #
-match() { case $1 in $2) return 0; esac; return 1; }
+match() { case $1 in "$2") return 0; esac; return 1; }
 
 add_pass() {
-  [ -f "$2".age ] &&
-    errors "Pass name '$2' already exists"
+  [ -f "$name".age ] &&
+    errors "Pass name '$name' already exists"
+
+  match "$categ" '*/*' && { mkdir -p "$categ" 2>/dev/null ||
+    errors "Couldn't create category '$categ'"; }
 }
 
 gen_key() {
@@ -79,10 +82,10 @@ main() {
   : "${PAGE_DIR:=${XDG_DATA_HOME:-$HOME/.local/share}/page}"
 
   mkdir -p "$PAGE_DIR" 2>/dev/null ||
-    errors "Could not create storage location '$PAGE_DIR'"
+    errors "Couldn't create storage location '$PAGE_DIR'"
 
   cd "$PAGE_DIR" 2>/dev/null ||
-    errors "Could not access '$PAGE_DIR' directory"
+    errors "Couldn't access '$PAGE_DIR' directory"
 
   match "$1" '-[acds]' && [ -z "$2" ] &&
     errors "Option $1 requires an argument"
@@ -92,7 +95,20 @@ main() {
 
   key=key.age
 
+  match "$1" '-[acds]' && [ ! -f "$key" ] &&
+    errors "Couldn't find master key"
+
+  match "$2" '*/*' && match "$2" '*../*' &&
+    errors "Category went out of bounds"
+
+  match "$2" '/*' &&
+    errors "Category can't start with '/'"
+
+  #
   # Obtiene el nombre y la categoría de la contraseña.
+  #
+  name=${2##*/}
+  categ=${2%/*}
 
   #
   # Restringe los permisos de todos los archivos
