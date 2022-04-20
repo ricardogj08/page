@@ -57,7 +57,9 @@ exit 0
 #
 # @return boolean
 #
-match() { case $1 in "$2") return 0; esac; return 1; }
+# shellcheck disable=SC2254
+#
+match() { case $1 in $2) return 0; esac; return 1; }
 
 #
 # Genera una llave maestra de cifrado.
@@ -69,9 +71,73 @@ gen_key() {
   age-keygen | age -p > "$key" || rm -f "$key"
 }
 
+#
+# Confirma una acción.
+#
+# @return boolean
+#
+confirm() {
+  printf '%s [y/n]: ' "$1"
+
+  #
+  # Habilita la entrada sin formato,
+  # stdin no espera un Return.
+  #
+  stty -icanon
+
+  #
+  # Lee un solo byte desde stdin.
+  #
+  answer=$(dd ibs=1 count=1 2>/dev/null)
+
+  #
+  # Habilita la entrada con formato.
+  #
+  stty icanon
+
+  printf '\n'
+
+  match "$answer" '[yY]'
+}
+
+#
+# Lee una contraseña sin imprimirla.
+#
+pread() {
+  printf '%s: ' "$2"
+
+  stty -echo
+
+  read -r "$1"
+
+  stty echo
+
+  printf '\n'
+}
+
 add_pass() {
   [ -f "$name".age ] &&
     errors "Pass name '$name' already exists"
+
+  if confirm "Generate a random password?"; then
+    #
+    # Genera una contraseña aleatoria
+    # desde una serie de bytes aleatorios.
+    #
+    pass=$(LC_ALL=C tr -dc "${PAGE_PATTERN:-_[:alnum:]}" < /dev/urandom |
+         dd ibs=1 obs=1 count="${PAGE_LENGTH:-12}" 2>/dev/null)
+  else
+    pread pass "Enter password"
+
+    pread pass2 "Enter password (again)"
+
+    #
+    # shellcheck disable=SC2154
+    #
+    [ "$pass" = "$pass2" ] || errors "Passwords don't match"
+  fi
+
+  [ -z "$pass" ] && errors "Failed to generate a password"
 
   match "$categ" '*/*' && { mkdir -p "$categ" ||
     errors "Couldn't create category '$categ'"; }
