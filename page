@@ -1,15 +1,15 @@
 #!/bin/sh
 #
 # page - A simple password manager using age written in POSIX sh.
-# 
+#
 # Copyright (C) 2020-2022 - Ricardo García Jiménez <ricardogj08@riseup.net>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,17 +59,22 @@ exit 0
 #
 match() { case $1 in "$2") return 0; esac; return 1; }
 
+#
+# Genera una llave maestra de cifrado.
+#
+gen_key() {
+  [ -f "$key" ] &&
+    errors "Master key already exists"
+
+  age-keygen | age -p > "$key" || rm -f "$key"
+}
+
 add_pass() {
   [ -f "$name".age ] &&
     errors "Pass name '$name' already exists"
 
-  match "$categ" '*/*' && { mkdir -p "$categ" 2>/dev/null ||
+  match "$categ" '*/*' && { mkdir -p "$categ" ||
     errors "Couldn't create category '$categ'"; }
-}
-
-gen_key() {
-  [ -f "$key" ] &&
-    errors "Master key already exists"
 }
 
 main() {
@@ -81,11 +86,11 @@ main() {
   #
   : "${PAGE_DIR:=${XDG_DATA_HOME:-$HOME/.local/share}/page}"
 
-  mkdir -p "$PAGE_DIR" 2>/dev/null ||
-    errors "Couldn't create storage location '$PAGE_DIR'"
+  mkdir -p "$PAGE_DIR" ||
+    errors "Couldn't create password directory"
 
-  cd "$PAGE_DIR" 2>/dev/null ||
-    errors "Couldn't access '$PAGE_DIR' directory"
+  cd "$PAGE_DIR" ||
+    errors "Couldn't access password directory"
 
   match "$1" '-[acds]' && [ -z "$2" ] &&
     errors "Option $1 requires an argument"
