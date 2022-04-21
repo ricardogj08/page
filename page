@@ -115,6 +115,14 @@ pread() {
   printf '\n'
 }
 
+#
+# Obtiene la llave pública de cifrado.
+#
+pub_key() { age -d -i "$key" "$key" | age-keygen -y; }
+
+#
+# Agrega una nueva contraseña.
+#
 add_pass() {
   [ -f "$name".age ] &&
     errors "Pass name '$name' already exists"
@@ -139,8 +147,22 @@ add_pass() {
 
   [ -z "$pass" ] && errors "Failed to generate a password"
 
-  match "$categ" '*/*' && { mkdir -p "$categ" ||
+  pub=$(pub_key)
+
+  [ -z "$pub" ] && errors "Incorrect master key password"
+
+  match "$name" '*/*' && { mkdir -p "$categ" ||
     errors "Couldn't create category '$categ'"; }
+
+  #
+  # Utiliza "age" para almacenar una contraseña
+  # dentro de un archivo cifrado.
+  #
+  age -r "$pub" -o "$name".age <<-EOF &&
+		$pass
+	EOF
+
+  printf '%s\n' "Saved '$name' to the store."
 }
 
 main() {
@@ -178,14 +200,14 @@ main() {
   #
   # Obtiene el nombre y la categoría de la contraseña.
   #
-  name=${2##*/}
+  name="$2"
   categ=${2%/*}
 
   #
   # Restringe los permisos de todos los archivos
-  # generados solo al usuario actual: chmod 600
+  # generados solo al usuario actual: chmod 700
   #
-  umask 177
+  umask 077
 
   #
   # Asegura configurar la terminal a un estado

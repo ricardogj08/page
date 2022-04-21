@@ -18,6 +18,7 @@ A simple password manager using `age` written in POSIX `sh`.
 * [Manual de Referencia de Bash, para Bash, Version 5.1](https://freakspot.net/programas/docs/bash/manual-de-referencia-de-Bash_5.1.html)
 * [Advanced Bash-Scripting Guide.](https://tldp.org/LDP/abs/html/)
 * [Korn shell](https://www.ibm.com/docs/en/aix/7.3?topic=shells-korn-shell)
+* [When using <<-, you can only indent with tabs.](https://github.com/koalaman/shellcheck/wiki/SC1040)
 
 ## License
 
