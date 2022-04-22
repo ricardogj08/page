@@ -172,6 +172,25 @@ add_pass() {
   printf '%s\n' "Saved '$name' to the store."
 }
 
+#
+# Lista todas las contraseñas almacenadas.
+#
+list_pass() {
+  find . -type f -name \*.age | sed 's/..//;s/\.age$//'
+}
+
+#
+# Elimina contraseñas y categorías vacías.
+#
+delete_pass() {
+  [ "$1".age != "$key" ] &&
+    confirm "Delete pass name '$1'?" && {
+      rm -f "$1".age
+
+      rmdir -p "$categ" 2>/dev/null
+    }
+}
+
 main() {
   command -v age 2>/dev/null >&2 ||
     errors "'age' not found"
@@ -198,8 +217,9 @@ main() {
   match "$1" '-[acds]' && [ ! -f "$key" ] &&
     errors "Couldn't find master key"
 
-  match "$2" '*/*' && match "$2" '*../*' &&
-    errors "Category went out of bounds"
+  match "$2" '*/*' && { match "$2" '*../*' ||
+    match "$2" '*./*' &&
+      errors "Category went out of bounds"; }
 
   match "$2" '/*' &&
     errors "Category can't start with '/'"
@@ -224,7 +244,7 @@ main() {
   case $1 in
     -a) add_pass "$2" ;;
     -c) copy_pass ;;
-    -d) delete_pass ;;
+    -d) delete_pass "$2" ;;
     -g) gen_key ;;
     -l) list_pass ;;
     -s) decrypt "$2.age" ;;
