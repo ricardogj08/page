@@ -2,12 +2,60 @@
 
 A simple password manager using `age` written in POSIX `sh`.
 
+> A pash gpg fork to age
+
 ## Dependencies
 
 * `sh`, `bash`, `zsh` or other shell like UNIX.
 * GNU Coreutils, BusyBox, Toybox, sbase or other UNIX utilities.
 * [age >= 1.0.0 - a simple, modern and secure file encryption tool, format, and Go library.](https://github.com/FiloSottile/age)
 * [wayclip (optional) -  Wayland clipboard utility.](https://github.com/noocsharp/wayclip)
+
+## Usage
+
+Show help message:
+
+`$ page`
+
+First, generate a master encryption key:
+
+`$ page -g`
+
+Save a password:
+
+`$ page -a foo@example.com`
+
+Or save a password with category:
+
+`$ page -a email/foo@example.com`
+
+Show a password:
+
+`$ page -s foo@example.com`
+
+Or show a password with category:
+
+`$ page -s email/foo@example.com`
+
+List all passwords:
+
+`$ page -l`
+
+Copy a password to clipboard:
+
+`$ page -c foo@example.com`
+
+Or copy a password with category to clipboard:
+
+`$ page -c email/foo@example.com`
+
+Delete a password:
+
+`$ page -d foo@example.com`
+
+Or delete a password with category:
+
+`$ page -d email/foo@example.com`
 
 ## References
 
@@ -25,7 +73,8 @@ A simple password manager using `age` written in POSIX `sh`.
 ```text
 page - A simple password manager using age written in POSIX sh.
 
-Copyright (C) 2020-2022 - Ricardo García Jiménez <ricardogj08@riseup.net>
+Copyright (C) 2020-2022 - Dylan Araps <dylan.araps@gmail.com>,
+                          Ricardo García Jiménez <ricardogj08@riseup.net>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.

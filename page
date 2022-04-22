@@ -2,7 +2,8 @@
 #
 # page - A simple password manager using age written in POSIX sh.
 #
-# Copyright (C) 2020-2022 - Ricardo García Jiménez <ricardogj08@riseup.net>
+# Copyright (C) 2020-2022 - Dylan Araps <dylan.araps@gmail.com>,
+#                           Ricardo García Jiménez <ricardogj08@riseup.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -192,14 +193,14 @@ delete_pass() {
 #
 copy_pass() {
   #
-  # Herrmienta de portapapeles por defecto.
+  # Herramienta de portapapeles por defecto.
   #
   : "${PAGE_CLIPBOARD:=waycopy -s seat0 -t text/plain}"
 
   decrypt "$fullname" | $PAGE_CLIPBOARD
 
   #
-  # Ejecuta un proceso en segundo plano para limipiar
+  # Ejecuta un proceso en segundo plano para limpiar
   # el portapapeles antes de un tiempo determinado.
   #
   [ "$PAGE_TIMEOUT" != off ] && {
