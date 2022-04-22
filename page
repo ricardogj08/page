@@ -118,7 +118,7 @@ pread() {
 #
 # Descifra un archivo con "age"
 #
-decrypt() { age -d -i "$key" "$1"; }
+decrypt() { age -d -i "$key" "$1" || kill 0; }
 
 #
 # Obtiene la llave pública de cifrado.
@@ -156,8 +156,6 @@ add_pass() {
 
   pub=$(pub)
 
-  [ -z "$pub" ] && errors "Incorrect master key password"
-
   match "$name" '*/*' && { mkdir -p "$categ" ||
     errors "Couldn't create category '$categ'"; }
 
@@ -189,6 +187,30 @@ delete_pass() {
 
       rmdir -p "$categ" 2>/dev/null
     }
+}
+
+#
+# Copia una contraseña al portapapeles.
+#
+copy_pass() {
+  #
+  # Herrmienta de portapapeles por defecto.
+  #
+  : "${PAGE_CLIPBOARD:=waycopy -s seat0 -t text/plain}"
+
+  decrypt "$1" | $PAGE_CLIPBOARD
+
+  #
+  # Ejecuta un proceso en segundo plano para limipiar
+  # el portapapeles antes de un tiempo determinado.
+  #
+  [ "$PAGE_TIMEOUT" != off ] && {
+    printf 'Clearing clipboard in "%s" seconds.\n' "${PAGE_TIMEOUT:=15}"
+
+    sleep "$PAGE_TIMEOUT" || kill 0
+
+    $PAGE_CLIPBOARD </dev/null
+  } &
 }
 
 main() {
@@ -243,7 +265,7 @@ main() {
 
   case $1 in
     -a) add_pass "$2" ;;
-    -c) copy_pass ;;
+    -c) copy_pass "$2.age" ;;
     -d) delete_pass "$2" ;;
     -g) gen_key ;;
     -l) list_pass ;;
