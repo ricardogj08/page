@@ -116,14 +116,21 @@ pread() {
 }
 
 #
+# Descifra un archivo con "age"
+#
+decrypt() { age -d -i "$key" "$1"; }
+
+#
 # Obtiene la llave pública de cifrado.
 #
-pub_key() { age -d -i "$key" "$key" | age-keygen -y; }
+pub() { decrypt "$key" | age-keygen -y; }
 
 #
 # Agrega una nueva contraseña.
 #
 add_pass() {
+  name="$1"
+
   [ -f "$name".age ] &&
     errors "Pass name '$name' already exists"
 
@@ -147,7 +154,7 @@ add_pass() {
 
   [ -z "$pass" ] && errors "Failed to generate a password"
 
-  pub=$(pub_key)
+  pub=$(pub)
 
   [ -z "$pub" ] && errors "Incorrect master key password"
 
@@ -198,9 +205,8 @@ main() {
     errors "Category can't start with '/'"
 
   #
-  # Obtiene el nombre y la categoría de la contraseña.
+  # Obtiene la categoría de la contraseña.
   #
-  name="$2"
   categ=${2%/*}
 
   #
@@ -216,12 +222,12 @@ main() {
   [ -t 1 ] && trap 'stty echo icanon' INT EXIT
 
   case $1 in
-    -a) add_pass ;;
+    -a) add_pass "$2" ;;
     -c) copy_pass ;;
     -d) delete_pass ;;
     -g) gen_key ;;
     -l) list_pass ;;
-    -s) show_pass ;;
+    -s) decrypt "$2.age" ;;
      *) shelp
   esac
 }
