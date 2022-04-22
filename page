@@ -155,8 +155,8 @@ add_pass() {
 
   pub=$(pub)
 
-  match "$name" '*/*' && { mkdir -p "$categ" ||
-    errors "Couldn't create category '$categ'"; }
+  match "$name" '*/*' && { mkdir -p "$category" ||
+    errors "Couldn't create category '$category'"; }
 
   #
   # Utiliza "age" para almacenar una contraseña
@@ -184,7 +184,7 @@ delete_pass() {
     confirm "Delete pass name '$name'?" && {
       rm -f "$fullname"
 
-      rmdir -p "$categ" 2>/dev/null
+      rmdir -p "$category" 2>/dev/null
   }
 }
 
@@ -230,7 +230,7 @@ main() {
   action="$1"
   name="$2"
   fullname="$2".age
-  categ=${2%/*}
+  category=${2%/*}
   key=key.age
 
   match "$action" '-[acds]' && [ -z "$name" ] &&

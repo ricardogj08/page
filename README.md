@@ -49,11 +49,11 @@ List all passwords:
 
 `$ page -l`
 
-Copy a password to clipboard:
+Copy a password to the clipboard:
 
 `$ page -c foo@example.com`
 
-Or copy a password with category to clipboard:
+Or copy a password with category to the clipboard:
 
 `$ page -c email/foo@example.com`
 
