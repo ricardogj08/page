@@ -129,9 +129,7 @@ pub() { decrypt "$key" | age-keygen -y; }
 # Agrega una nueva contraseña.
 #
 add_pass() {
-  name="$1"
-
-  [ -f "$name".age ] &&
+  [ -f "$fullname" ] &&
     errors "Pass name '$name' already exists"
 
   if confirm "Generate a random password?"; then
@@ -163,7 +161,7 @@ add_pass() {
   # Utiliza "age" para almacenar una contraseña
   # dentro de un archivo cifrado.
   #
-  age -r "$pub" -o "$name".age <<-EOF &&
+  age -r "$pub" -o "$fullname" <<-EOF &&
 		$pass
 	EOF
 
@@ -181,12 +179,12 @@ list_pass() {
 # Elimina contraseñas y categorías vacías.
 #
 delete_pass() {
-  [ "$1".age != "$key" ] &&
-    confirm "Delete pass name '$1'?" && {
-      rm -f "$1".age
+  [ "$fullname" != "$key" ] &&
+    confirm "Delete pass name '$name'?" && {
+      rm -f "$fullname"
 
       rmdir -p "$categ" 2>/dev/null
-    }
+  }
 }
 
 #
@@ -198,7 +196,7 @@ copy_pass() {
   #
   : "${PAGE_CLIPBOARD:=waycopy -s seat0 -t text/plain}"
 
-  decrypt "$1" | $PAGE_CLIPBOARD
+  decrypt "$fullname" | $PAGE_CLIPBOARD
 
   #
   # Ejecuta un proceso en segundo plano para limipiar
@@ -228,28 +226,27 @@ main() {
   cd "$PAGE_DIR" ||
     errors "Couldn't access password directory"
 
-  match "$1" '-[acds]' && [ -z "$2" ] &&
-    errors "Option $1 requires an argument"
-
-  match "$1" '-[cds]' && [ ! -f "$2".age ] &&
-    errors "Pass name '$2' doesn't exist"
-
+  action="$1"
+  name="$2"
+  fullname="$2".age
+  categ=${2%/*}
   key=key.age
 
-  match "$1" '-[acds]' && [ ! -f "$key" ] &&
-    errors "Couldn't find master key"
+  match "$action" '-[acds]' && [ -z "$name" ] &&
+    errors "Option $action requires an argument"
 
-  match "$2" '*/*' && { match "$2" '*../*' ||
-    match "$2" '*./*' &&
+  match "$name" '*/*' && { match "$name" '*../*' ||
+    match "$name" '*./*' &&
       errors "Category went out of bounds"; }
 
-  match "$2" '/*' &&
+  match "$name" '/*' &&
     errors "Category can't start with '/'"
 
-  #
-  # Obtiene la categoría de la contraseña.
-  #
-  categ=${2%/*}
+  match "$action" '-[cds]' && [ ! -f "$fullname" ] &&
+    errors "Pass name '$name' doesn't exist"
+
+  match "$action" '-[acds]' && [ ! -f "$key" ] &&
+    errors "Couldn't find master key"
 
   #
   # Restringe los permisos de todos los archivos
@@ -263,13 +260,13 @@ main() {
   #
   [ -t 1 ] && trap 'stty echo icanon' INT EXIT
 
-  case $1 in
-    -a) add_pass "$2" ;;
-    -c) copy_pass "$2.age" ;;
-    -d) delete_pass "$2" ;;
+  case $action in
+    -a) add_pass ;;
+    -c) copy_pass ;;
+    -d) delete_pass ;;
     -g) gen_key ;;
     -l) list_pass ;;
-    -s) decrypt "$2.age" ;;
+    -s) decrypt "$fullname" ;;
      *) shelp
   esac
 }
