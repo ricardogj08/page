@@ -117,7 +117,7 @@ pread() {
 }
 
 #
-# Descifra un archivo con "age"
+# Descifra un archivo con "age".
 #
 decrypt() { age -d -i "$key" "$1" || kill 0; }
 
@@ -151,7 +151,7 @@ add_pass() {
     [ "$pass" = "$pass2" ] || errors "Passwords don't match"
   fi
 
-  [ -z "$pass" ] && errors "Failed to generate a password"
+  [ "$pass" ] || errors "Failed to generate a password"
 
   pub=$(pub)
 
@@ -201,7 +201,7 @@ copy_pass() {
 
   #
   # Ejecuta un proceso en segundo plano para limpiar
-  # el portapapeles antes de un tiempo determinado.
+  # el portapapeles depués de un tiempo determinado.
   #
   [ "$PAGE_TIMEOUT" != off ] && {
     printf 'Clearing clipboard in "%s" seconds.\n' "${PAGE_TIMEOUT:=15}"
@@ -251,7 +251,7 @@ main() {
 
   #
   # Restringe los permisos de todos los archivos
-  # generados solo al usuario actual: chmod 700
+  # generados para el usuario actual: chmod 700
   #
   umask 077
 
@@ -273,7 +273,7 @@ main() {
 }
 
 #
-# Desactiva siempre el modo debug.
+# Siempre desactiva el modo debug.
 #
 set +x
 
@@ -283,4 +283,4 @@ set +x
 #
 set -f
 
-main "$@"
+[ "$1" ] && main "$@" || shelp
