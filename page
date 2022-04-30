@@ -66,10 +66,10 @@ match() { case $1 in $2) return 0; esac; return 1; }
 # Genera una llave maestra de cifrado.
 #
 gen_key() {
-  [ -f "$key" ] &&
+  [ -f key.age ] &&
     errors "Master key already exists"
 
-  age-keygen | age -p > "$key" || rm -f "$key"
+  age-keygen | age -p > key.age || rm -f key.age
 }
 
 #
@@ -117,22 +117,14 @@ pread() {
 }
 
 #
-# Descifra un archivo con "age".
+# Descifra un archivo con 'age'.
 #
-decrypt() { age -d -i "$key" "$1" || kill 0; }
-
-#
-# Obtiene la llave pública de cifrado.
-#
-pub() { decrypt "$key" | age-keygen -y; }
+decrypt() { age -d -i key.age "$1.age" || kill 0; }
 
 #
 # Agrega una nueva contraseña.
 #
 add_pass() {
-  [ -f "$fullname" ] &&
-    errors "Pass name '$name' already exists"
-
   if confirm "Generate a random password?"; then
     #
     # Genera una contraseña aleatoria
@@ -153,20 +145,20 @@ add_pass() {
 
   [ "$pass" ] || errors "Failed to generate a password"
 
-  pub=$(pub)
-
-  match "$name" '*/*' && { mkdir -p "$category" ||
-    errors "Couldn't create category '$category'"; }
+  #
+  # Obtiene la llave pública de cifrado.
+  #
+  pub=$(decrypt key | age-keygen -y)
 
   #
-  # Utiliza "age" para almacenar una contraseña
+  # Utiliza 'age' para almacenar una contraseña
   # dentro de un archivo cifrado.
   #
-  age -r "$pub" -o "$fullname" <<-EOF &&
+  age -r "$pub" -o "$1.age" <<-EOF &&
 		$pass
 	EOF
 
-  printf '%s\n' "Saved '$name' to the store."
+  printf '%s\n' "Saved '$1' to the store."
 }
 
 #
@@ -180,11 +172,11 @@ list_pass() {
 # Elimina contraseñas y categorías vacías.
 #
 delete_pass() {
-  [ "$fullname" != "$key" ] &&
-    confirm "Delete pass name '$name'?" && {
-      rm -f "$fullname"
+  [ "$1.age" != key.age ] &&
+    confirm "Delete pass name '$1'?" && {
+      rm -f "$1.age"
 
-      rmdir -p "$category" 2>/dev/null
+      rmdir -p "${1%/*}" 2>/dev/null
   }
 }
 
@@ -197,7 +189,7 @@ copy_pass() {
   #
   : "${PAGE_CLIPBOARD:=waycopy -s seat0 -t text/plain}"
 
-  decrypt "$fullname" | $PAGE_CLIPBOARD
+  decrypt "$1" | $PAGE_CLIPBOARD
 
   #
   # Ejecuta un proceso en segundo plano para limpiar
@@ -213,7 +205,7 @@ copy_pass() {
 }
 
 main() {
-  command -v age 2>/dev/null >&2 ||
+  command -v age >/dev/null 2>&1 ||
     errors "'age' not found"
 
   #
@@ -227,27 +219,27 @@ main() {
   cd "$PAGE_DIR" ||
     errors "Couldn't access password directory"
 
-  action="$1"
-  name="$2"
-  fullname="$2".age
-  category=${2%/*}
-  key=key.age
+  match "$1" '-[acds]' && [ -z "$2" ] &&
+    errors "Option $1 requires an argument"
 
-  match "$action" '-[acds]' && [ -z "$name" ] &&
-    errors "Option $action requires an argument"
-
-  match "$name" '*/*' && { match "$name" '*../*' ||
-    match "$name" '*./*' &&
+  match "$2" '*/*' && { match "$2" '*../*' ||
+    match "$2" '*./*' &&
       errors "Category went out of bounds"; }
 
-  match "$name" '/*' &&
+  match "$2" '/*' &&
     errors "Category can't start with '/'"
 
-  match "$action" '-[cds]' && [ ! -f "$fullname" ] &&
-    errors "Pass name '$name' doesn't exist"
-
-  match "$action" '-[acds]' && [ ! -f "$key" ] &&
+  match "$1" '-[acds]' && [ ! -f key.age ] &&
     errors "Couldn't find master key"
+
+  match "$1" '-[cds]' && [ ! -f "$2.age" ] &&
+    errors "Pass name '$2' doesn't exist"
+
+  match "$1" '-a' && [ -f "$2.age" ] &&
+    errors "Pass name '$2' already exists"
+
+  match "$2" '*/*' && { mkdir -p "${2%/*}" ||
+    errors "Couldn't create category '${2%/*}'"; }
 
   #
   # Restringe los permisos de todos los archivos
@@ -261,13 +253,13 @@ main() {
   #
   [ -t 1 ] && trap 'stty echo icanon' INT EXIT
 
-  case $action in
-    -a) add_pass ;;
-    -c) copy_pass ;;
-    -d) delete_pass ;;
+  case $1 in
+    -a) add_pass "$2" ;;
+    -c) copy_pass "$2" ;;
+    -d) delete_pass "$2" ;;
     -g) gen_key ;;
     -l) list_pass ;;
-    -s) decrypt "$fullname" ;;
+    -s) decrypt "$2" ;;
      *) shelp
   esac
 }
@@ -283,4 +275,4 @@ set +x
 #
 set -f
 
-[ "$1" ] && main "$@" || shelp
+[ "$1" ] || shelp && main "$@"
