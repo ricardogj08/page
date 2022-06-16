@@ -1,6 +1,6 @@
 # page
 
-A simple password manager using age written in POSIX sh.
+A simple password manager using `age` written in POSIX `sh`.
 
 > A pash gpg fork to age.
 
@@ -13,55 +13,55 @@ A simple password manager using age written in POSIX sh.
 
 ## Installation
 
-    $ git clone https://github.com/ricardogj08/page.git
-    $ cd page
-    $ sudo cp page /usr/local/bin/
+    git clone https://github.com/ricardogj08/page.git
+    cd page
+    sudo cp page /usr/local/bin
 
 ## Usage
 
 Show help message:
 
-    $ page
+    page
 
 First, generate a master encryption key:
 
-    $ page -g
+    page -g
 
 Save a password:
 
-    $ page -a foo@example.com
+    page -a foo@example.com
 
 Or save a password with category:
 
-    $ page -a email/foo@example.com
+    page -a email/foo@example.com
 
 Show a password:
 
-    $ page -s foo@example.com
+    page -s foo@example.com
 
 Or show a password with category:
 
-    $ page -s email/foo@example.com
+    page -s email/foo@example.com
 
 List all passwords:
 
-    $ page -l
+    page -l
 
 Copy a password to the clipboard:
 
-    $ page -c foo@example.com
+    page -c foo@example.com
 
 Or copy a password with category to the clipboard:
 
-    $ page -c email/foo@example.com
+    page -c email/foo@example.com
 
 Delete a password:
 
-    $ page -d foo@example.com
+    page -d foo@example.com
 
 Or delete a password with category:
 
-    $ page -d email/foo@example.com
+    page -d email/foo@example.com
 
 ## References
 
